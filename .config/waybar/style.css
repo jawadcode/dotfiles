@@ -1,0 +1,118 @@
+* {
+    /* `otf-font-awesome` is required to be installed for icons */
+    font-family: Roboto, monospace;
+    font-size: 16px;
+}
+
+window#waybar {
+    background-color: rgba(0, 0, 0, 0);
+    transition-property: background-color;
+    transition-duration: .5s;
+    padding: 5px;
+}
+
+window#waybar.hidden {
+    opacity: 0.2;
+}
+
+window#waybar>box.horizontal {
+    background-color: #1c1c1c;
+    margin: 5px;
+    border-radius: 5px;
+}
+
+box.horizontal.modules-left {
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+}
+
+box.horizontal.modules-center {
+    color: #ffffff;
+    padding: 5px 0;
+}
+
+#workspaces button {
+    padding: 0 6px;
+    background-color: transparent;
+    color: #ffffff;
+    border: none;
+    border-radius: 5px;
+}
+
+/* https://github.com/Alexays/Waybar/wiki/FAQ#the-workspace-buttons-have-a-strange-hover-effect */
+#workspaces button:hover {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+#workspaces button.focused {
+    background-color: #3c3c3c;
+}
+
+#workspaces button.urgent {
+    background-color: #eb4d4b;
+}
+
+#clock,
+#battery,
+#cpu,
+#memory,
+#disk,
+#pulseaudio,
+#custom-media,
+#tray,
+#mode {
+    padding: 0 10px;
+}
+
+#window,
+#workspaces {
+    margin: 0 4px;
+}
+
+/* If workspaces is the leftmost module, omit left margin */
+.modules-left > widget:first-child > #workspaces {
+    margin-left: 0;
+}
+
+/* If workspaces is the rightmost module, omit right margin */
+.modules-right > widget:last-child > #workspaces {
+    margin-right: 0;
+}
+
+@keyframes blink {
+    to {
+        background-color: #ffffff;
+        color: #000000;
+    }
+}
+
+#battery.critical:not(.charging) {
+    background-color: #f53c3c;
+    color: #ffffff;
+    animation-name: blink;
+    animation-duration: 0.5s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+    animation-direction: alternate;
+}
+
+#tray > .passive {
+    -gtk-icon-effect: dim;
+}
+
+#tray > .needs-attention {
+    -gtk-icon-effect: highlight;
+}
+
+#language {
+    padding: 0 5px;
+    min-width: 16px;
+}
+
+#keyboard-state > label {
+    padding: 0 5px;
+}
+
+#keyboard-state > label.locked {
+    background: rgba(0, 0, 0, 0.2);
+}
