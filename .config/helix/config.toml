@@ -1,0 +1,19 @@
+# theme = "jawad_dark"
+theme = "jawad_dark_plus"
+
+[editor]
+color-modes = true
+bufferline = "always"
+
+[editor.lsp]
+display-inlay-hints = true
+
+[editor.statusline]
+left = ["mode", "spinner"]
+center = ["file-name"]
+right = ["diagnostics", "selections", "position", "file-encoding", "file-line-ending", "file-type"]
+separator = "│"
+
+[keys.normal]
+"S-tab" = "goto_next_buffer"
+"A-tab" = "goto_previous_buffer"

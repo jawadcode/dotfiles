@@ -1,0 +1,7 @@
+[user]
+	email = jawad.w.ahmed@gmail.com
+	name = Jawad Ahmed
+[credential]
+	username = jawadcode
+	# Make sure to compile this:
+	helper = "/usr/share/git/credential/libsecret/git-credential-libsecret"

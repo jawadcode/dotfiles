@@ -1,0 +1,13 @@
+[[language]]
+name = "python"
+roots = ["pyproject.toml", "setup.py", "."]
+language-server = { command = "pyright-langserver", args = ["--stdio"] }
+config = {}
+
+[[language]]
+name = "c"
+indent = { tab-width = 4, unit = "    " }
+
+[[language]]
+name = "cpp"
+indent = { tab-width = 4, unit = "    " }
