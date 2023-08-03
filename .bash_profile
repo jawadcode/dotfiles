@@ -2,10 +2,6 @@
 # ~/.bash_profile
 #
 
-[[ -f ~/.bashrc ]] && . ~/.bashrc
-
-. "$HOME/.cargo/env"
-
 export MOZ_ENABLE_WAYLAND=1
 
 # Added by Toolbox App
@@ -25,3 +21,7 @@ export EDITOR="helix"
 export CC=clang
 export CXX=clang++
 export CC_LD=mold
+
+export GTK_THEME=Yaru-blue-dark
+
+[[ -f ~/.bashrc ]] && . ~/.bashrc
