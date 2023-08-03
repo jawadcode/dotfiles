@@ -9,4 +9,5 @@ return {
     font = wezterm.font_with_fallback({ "JetBrainsMono Nerd Font", "Noto Color Emoji" }),
     line_height = 0.9,
     font_size = 11.5,
+    hide_tab_bar_if_only_one_tab = true,
 }

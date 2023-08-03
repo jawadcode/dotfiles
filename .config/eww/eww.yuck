@@ -9,7 +9,7 @@
     (metric :label "🔊"
             :value volume
             :onchange "pactl set-sink-volume @DEFAULT_SINK@ {}%")
-    (metric :label ""
+    (metric :label "🐏"
             :value {EWW_RAM.used_mem_perc}
             :onchange "")
     (metric :label "🔋"
