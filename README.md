@@ -68,7 +68,7 @@ makepkg -si
 
 ##### Rustup - toolchain manager for Rust:
 
-[https://rustup.rs] contains instructions on how to install, or it can be installed using `paru`:
+https://rustup.rs contains instructions on how to install, or it can be installed using `paru`:
 
 ```bash
 # This may conflict with `rust` however that is just a built-dependency of `paru` so it can be safely uninstalled
@@ -77,7 +77,7 @@ paru -S rustup
 
 ##### GHCup - manages different versions of GHC, Cabal, Stack and HLS:
 
-[https://haskell.org/ghcup] contains instructions on how to install, or it can be installed using `paru`:
+https://haskell.org/ghcup contains instructions on how to install, or it can be installed using `paru`:
 
 ```bash
 paru -S ghcup-hs-bin
@@ -85,7 +85,7 @@ paru -S ghcup-hs-bin
 
 #### Opam - source-based package manager for OCaml tooling and libraries:
 
-[https://ocaml.org/docs/get-up-and-running] contains instructions on how to install,
+https://ocaml.org/docs/get-up-and-running contains instructions on how to install,
 including installing opam using `pacman`
 
 ### C/C++:
@@ -137,9 +137,9 @@ paru -S conan
 ### WM Setup:
 
 * [Ly] - A lightweight TUI display/login manager
-* [Swaybg] - Sets the desktop background
-* [Swaylock] - A lock screen that will be used when the computer idles
-* [Swayidle] - Idle management daemon which allows you to put the computer to sleep after a short while
+* Swaybg - Sets the desktop background
+* Swaylock - A lock screen that will be used when the computer idles
+* Swayidle - Idle management daemon which allows you to put the computer to sleep after a short while
 * [Hyprland](https://github.com/hyprwm/Hyprland) - A feature-rich, customisable, dynamic-tiling Wayland WM
 * [Pipewire](https://gitlab.freedesktop.org/pipewire/pipewire) - An API to deal with multi-media pipelines, particularly audio
 * [Wireplumber](https://gitlab.freedesktop.org/pipewire/wireplumber) - A session manager for Pipewire
@@ -212,4 +212,4 @@ sudo systemctl start ly
 ```
 ## Hyprland NVidia config:
 
-See [./hyprland-nvidia.md]
+See [hyprland-nvidia.md](hyprland-nvidia.md)
