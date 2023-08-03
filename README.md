@@ -60,7 +60,6 @@ I chose [Paru](https://github.com/Morganamilo/paru) because of its colour suppor
 git clone https://aur.archlinux.org/paru.git
 cd paru
 makepkg -si
-# The `paru` directory can be deleted afterwards
 ```
 
 ### Development Environment:
@@ -72,7 +71,7 @@ makepkg -si
 [https://rustup.rs] contains instructions on how to install, or it can be installed using `paru`:
 
 ```bash
-# This may conflict with `rust` however that is just a built-dependency of `paru` so it can be uninstalled
+# This may conflict with `rust` however that is just a built-dependency of `paru` so it can be safely uninstalled
 paru -S rustup
 ```
 
