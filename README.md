@@ -177,6 +177,8 @@ paru -S ly                             \
         python-psutil                  \
         eww-wayland                    \
         nwg-drawer-bin                 \
+        yaru-gtk-theme                 \
+        yaru-plus-git                  \
         nautilus                       \
         wezterm                        \
         firefox                        \
@@ -201,6 +203,11 @@ systemctl --user start secretserviced.service
 
 cd /usr/share/git/credential/libsecret/
 sudo make
+
+# GTK theme (this is done in `~/.config/gtk-3.0/settings.ini` and
+# `~/.config/gtk-4.0/settings.ini` but this is just to be safe):
+gsettings set org.gnome.desktop.interface gtk-theme "Yaru-blue-dark"
+gsettings set org.
 
 # WM stuff
 sudo systemctl enable ly
