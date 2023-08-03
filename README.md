@@ -207,7 +207,8 @@ sudo make
 # GTK theme (this is done in `~/.config/gtk-3.0/settings.ini` and
 # `~/.config/gtk-4.0/settings.ini` but this is just to be safe):
 gsettings set org.gnome.desktop.interface gtk-theme "Yaru-blue-dark"
-gsettings set org.
+gsettings set org.gnome.desktop.interface icon-theme "Yaru++-Dark"
+gsettings set org.gnome.desktop.interface color-scheme prefer-dark
 
 # WM stuff
 sudo systemctl enable ly
