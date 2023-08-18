@@ -39,5 +39,5 @@ paru -S qt5-wayland         \
         libva-nvidia-driver \
 ```
 
-Note: you may want to add `enable_wayland = true` to your wezterm config,
+Note: you may want to add `enable_wayland = false` to your wezterm config,
 I discovered a bug where the window is completely transprent and this fixed it.
