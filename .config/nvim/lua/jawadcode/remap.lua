@@ -1,5 +1,3 @@
-vim.g.mapleader = " "
-
 vim.keymap.set("n", "<leader>tn", vim.cmd.tabnew, { desc = "new tab" })
 vim.keymap.set("n", "<leader>te", vim.cmd.tabnext, { desc = "next tab" })
 vim.keymap.set("n", "<leader>tp", vim.cmd.tabprevious, { desc = "previous tab" })
