@@ -5,7 +5,7 @@ if not vim.loop.fs_stat(lazypath) then
         "clone",
         "--filter=blob:none",
         "https://github.com/folke/lazy.nvim.git",
-        "--branch=stable", -- latest stable release
+        "--branch=stable",
         lazypath,
     })
 end
@@ -15,10 +15,9 @@ vim.g.mapleader = " "
 
 return require("lazy").setup {
     {
-        'nvim-telescope/telescope.nvim',
-        tag = '0.1.4',
-        -- or                          , branch = '0.1.x',
-        dependencies = { 'nvim-lua/plenary.nvim' }
+        "nvim-telescope/telescope.nvim",
+        tag = "0.1.4",
+        dependencies = { "nvim-lua/plenary.nvim" }
     },
 
     "Mofiqul/vscode.nvim",
@@ -32,19 +31,17 @@ return require("lazy").setup {
 
     "tpope/vim-fugitive",
 
-
-    { 'VonHeikemen/lsp-zero.nvim', branch = 'v3.x' },
-    { 'neovim/nvim-lspconfig' },
-    { 'hrsh7th/cmp-nvim-lsp' },
-    { 'hrsh7th/nvim-cmp' },
-    { 'L3MON4D3/LuaSnip' },
-
-    "simrat39/rust-tools.nvim",
+    { "VonHeikemen/lsp-zero.nvim", branch = "v3.x" },
+    { "neovim/nvim-lspconfig" },
+    { "hrsh7th/cmp-nvim-lsp" },
+    { "hrsh7th/nvim-cmp" },
+    { "hrsh7th/cmp-cmdline" },
+    { "L3MON4D3/LuaSnip" },
 
     {
-        'windwp/nvim-autopairs',
+        "windwp/nvim-autopairs",
         event = "InsertEnter",
-        opts = {} -- this is equalent to setup({}) function
+        opts = {}
     },
 
     {
@@ -55,9 +52,6 @@ return require("lazy").setup {
             vim.o.timeoutlen = 300
         end,
         opts = {
-            -- your configuration comes here
-            -- or leave it empty to use the default settings
-            -- refer to the configuration section below
         }
     },
 
@@ -72,4 +66,16 @@ return require("lazy").setup {
     "drybalka/tree-climber.nvim",
 
     "HiPhish/rainbow-delimiters.nvim",
+
+    "simrat39/rust-tools.nvim",
+
+    {
+        "Julian/lean.nvim",
+        event = { "BufReadPre *.lean", "BufNewFile *.lean" },
+
+        dependencies = {
+            "neovim/nvim-lspconfig",
+            "nvim-lua/plenary.nvim",
+        },
+    }
 }

@@ -15,7 +15,7 @@ lsp.on_attach(function(_, bufnr)
     vim.keymap.set("i", "<C-h>", function() vim.lsp.buf.signature_help() end, opts)
 end)
 
-lsp.setup_servers { "texlab", "clangd", "pyright", "rust_analyzer", "ocamllsp", "hls" }
+lsp.setup_servers { "texlab", "clangd", "pyright", "rust_analyzer", "ocamllsp", "hls", "leanls" }
 
 require "lspconfig".lua_ls.setup(lsp.nvim_lua_ls())
 
@@ -57,5 +57,14 @@ rust_tools.setup {
         on_attach = function(_, bufnr)
             vim.keymap.set("n", "<leader>ca", rust_tools.hover_actions.hover_actions, { buffer = bufnr })
         end
+    }
+}
+
+local lean = require "lean"
+
+lean.setup {
+    lsp = {
+        on_attach = function(_, _) end,
+        mappings = true,
     }
 }
