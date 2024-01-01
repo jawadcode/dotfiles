@@ -27,9 +27,7 @@ return require("lazy").setup {
         build = ":TSUpdate"
     },
 
-    "mbbill/undotree",
-
-    "tpope/vim-fugitive",
+    "lewis6991/gitsigns.nvim",
 
     { "VonHeikemen/lsp-zero.nvim", branch = "v3.x" },
     { "neovim/nvim-lspconfig" },
@@ -65,7 +63,15 @@ return require("lazy").setup {
 
     "drybalka/tree-climber.nvim",
 
+    "nvim-tree/nvim-tree.lua",
+
     "HiPhish/rainbow-delimiters.nvim",
+
+    {
+        "numToStr/Comment.nvim",
+        opts = {},
+        lazy = false
+    },
 
     "simrat39/rust-tools.nvim",
 

@@ -2,8 +2,6 @@ vim.keymap.set("n", "<leader>tn", vim.cmd.tabnew, { desc = "new tab" })
 vim.keymap.set("n", "<leader>te", vim.cmd.tabnext, { desc = "next tab" })
 vim.keymap.set("n", "<leader>tp", vim.cmd.tabprevious, { desc = "previous tab" })
 
-vim.keymap.set("n", "<leader>pv", vim.cmd.Ex, { desc = "open netrw" })
-
 vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv", { desc = "move selection up" })
 vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv", { desc = "move selection down" })
 

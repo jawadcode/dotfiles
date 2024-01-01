@@ -4,6 +4,7 @@ vim.keymap.set("n", "<leader>pi", builtin.git_files, { desc = "telescope git fil
 vim.keymap.set("n", "<leader>pg", function()
     builtin.grep_string { search = vim.fn.input("Grep > ") }
 end, { desc = "telescope grep search" })
+vim.keymap.set("n", "<leader>pb", builtin.buffers, { desc = "telescope buffers" })
 vim.keymap.set("n", "<leader>pt", builtin.treesitter, { desc = "telescope treesitter symbol search" })
 vim.keymap.set("n", "<leader>ps", builtin.lsp_workspace_symbols, { desc = "telescope symbol search (LSP)" })
 vim.keymap.set("n", "<leader>pr", builtin.lsp_references, { desc = "telescope variable references (LSP)" })
