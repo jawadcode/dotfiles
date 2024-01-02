@@ -1,8 +1,6 @@
 [[language]]
 name = "python"
-roots = ["pyproject.toml", "setup.py", "."]
-language-server = { command = "pyright-langserver", args = ["--stdio"] }
-config = {}
+language-servers = [ "pyright" ]
 
 [[language]]
 name = "c"
@@ -11,3 +9,19 @@ indent = { tab-width = 4, unit = "    " }
 [[language]]
 name = "cpp"
 indent = { tab-width = 4, unit = "    " }
+
+[[language]]
+name = "javascript"
+scope = "source.js"
+file-types = ["js"]
+language-servers = [ "typescript-language-server" ]
+formatter = { command = "biome", args = ["format", "--stdin-file-path", "test.js"]}
+auto-format = true
+
+[[language]]
+name = "typescript"
+scope = "source.ts"
+file-types = ["ts"]
+language-servers = [ "typescript-language-server" ]
+formatter = { command = "biome", args = ["format", "--stdin-file-path", "test.ts"]}
+auto-format = true
