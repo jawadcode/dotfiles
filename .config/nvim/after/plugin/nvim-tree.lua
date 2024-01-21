@@ -4,6 +4,6 @@ require "nvim-tree".setup {
 
         api.config.mappings.default_on_attach(bufnr)
 
-        vim.keymap.set("n", "<leader>pv", api.tree.toggle, { desc = "Open nvim-tree" })
+        vim.keymap.set("n", "<leader>pv", api.tree.toggle, { desc = "Toggle nvim-tree" })
     end
 }

@@ -19,6 +19,7 @@ vim.opt.hlsearch = false
 vim.opt.incsearch = true
 
 vim.opt.termguicolors = true
+vim.cmd.colorscheme("vscode")
 
 vim.opt.scrolloff = 8
 vim.opt.signcolumn = "yes"
@@ -32,4 +33,3 @@ vim.opt.clipboard = "unnamedplus"
 
 vim.g.loaded_netrw = 1
 vim.g.loaded_netrwPlugin = 1
-vim.api.nvim_set_hl(0, "NvimTreeNormal", { guibg=nil })
