@@ -21,7 +21,7 @@ end
 
 lsp.on_attach(on_attach)
 
-lsp.setup_servers { "bashls", "clangd", "cssls", "hls", "html", "jdtls", "leanls", "ocamllsp", "pyright", "texlab", "tsserver" }
+lsp.setup_servers { "bashls", "clangd", "cssls", "hls", "html", "jdtls", "leanls", "ocamllsp", "pyright", "swift_mesonls", "texlab", "tsserver" }
 
 require "lspconfig".lua_ls.setup(lsp.nvim_lua_ls())
 
