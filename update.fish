@@ -23,6 +23,7 @@ function update --description "Update all the shit that you don't even use"
 
     begin_section "Updating haskell"
     ghcup upgrade --inplace
+    ghcup tui
     end_section "Updated haskell"
 
     begin_section "Updating ocaml"
@@ -81,18 +82,12 @@ function clean --description "Clean up the crap left behind"
     end_section "Cleaned doom emacs"
 end
 
-function run([string]$command) {
-    switch ($command) {
-        update { update }
-        clean  { clean }
-        * {
-            echo "Usage: ./update.fish (update|clean)"
-            exit 1
-        }
-    }
-}
-
-if ($argv[1] -eq "--wsl") {
-} elseif ($argv[2] -eq "--wsl") {
-} else {
-}
+switch $argv[1]
+case update
+    update
+case clean
+    clean
+case "*"
+    echo "Usage: ./update.fish (update|clean)"
+    exit 1
+end
