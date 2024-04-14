@@ -5,6 +5,16 @@
 #+OPTIONS: toc:2
 #+PROPERTY: header-args:emacs-lisp :tangle ./init.el :mkdirp yes
 
+# TODO:
+# * Test this config in linux to see if startup is equally slow as with the
+#   mingw build of gccemacs.
+# * If it is as slow, then try fiddling with use-package's ensure keyword to try
+#   and load packages as lazily as possible while also having them actually load
+# * LaTeX stuff
+# * Proof-General for Coq and friends, might try testing on Windows if DKML
+#   can get opam and stuff working, I imagine it will work given the recent
+#   successful boostrapping of ocaml with MSVC.
+
 * Table of Contents :toc:
 - [[#prelude][Prelude]]
   - [[#initel-header][~init.el~ header]]
@@ -26,15 +36,17 @@
 - [[#editor][Editor]]
   - [[#evil-mode][Evil Mode]]
   - [[#which-key][Which-Key]]
+  - [[#treemacs][Treemacs]]
   - [[#buffer-move--buffer-keybinds][Buffer-Move + Buffer Keybinds]]
   - [[#projectile][Projectile]]
 - [[#appearance][Appearance]]
-  - [[#theme-standard-themes-light][Theme (Standard-Themes Light)]]
+  - [[#theme-standard-themes-light-disabled][Theme (Standard-Themes Light, Disabled)]]
   - [[#all-the-icons][All the Icons]]
   - [[#ligatures][Ligatures]]
   - [[#dashboard][Dashboard]]
   - [[#solaire-mode][Solaire-Mode]]
-  - [[#doom-themes-removed][Doom-Themes (Removed)]]
+  - [[#enable-divider-for-resizing-windows][Enable Divider for Resizing Windows]]
+  - [[#doom-themes-material-dark][Doom-Themes (Material Dark)]]
 - [[#org-mode][Org-Mode]]
   - [[#disabling-org-indent-mode][Disabling Org-Indent-Mode]]
   - [[#keybinds][Keybinds]]
@@ -54,7 +66,10 @@
   - [[#python-mode][Python-Mode]]
   - [[#haskell-mode][Haskell-Mode]]
   - [[#lean4-mode][Lean4-Mode]]
+  - [[#idris-mode][Idris-Mode]]
   - [[#meson-mode][Meson-Mode]]
+  - [[#cmake-mode][CMake-Mode]]
+  - [[#latex-auctex--more][Latex (AUCTeX + more)]]
 
 * Prelude
 
@@ -252,7 +267,7 @@ and other emacs packages.
 (jawadcode/leader-keys
   "t"   '(:ignore t :wk "Toggle")
   "t l" '(display-line-numbers-mode :wk "Toggle line numbers")
-  "t t" '(visual-line-mode :wk "Toggle truncated lines"))
+  "t v" '(visual-line-mode :wk "Toggle visual-line-mode"))
 #+end_src
 
 ** Sudo Edit
@@ -306,9 +321,7 @@ Vim keybinds in emacs because why not.
   :config (evil-collection-init)
   :diminish evil-collection-unimpaired-mode)
 
-(use-package evil-anzu
-  :after evil
-  :config (require 'evil-anzu))
+(use-package evil-anzu :after evil)
 
 (use-package evil-tutor)
 
@@ -335,6 +348,25 @@ keybind is pressed.
   :diminish which-key-mode)
 #+end_src
 
+** Treemacs
+
+This is a file-tree view that can be opened to the left side of any code buffers.
+
+#+begin_src emacs-lisp
+(use-package treemacs
+  :config
+  (jawadcode/leader-keys
+    "t t" '((lambda () (treemacs)) :wk "Toggle treemacs")))
+
+(use-package treemacs-evil :after (treemacs evil))
+
+(use-package treemacs-projectile :after (treemacs projectile))
+
+(use-package treemacs-all-the-icons :after (treemacs all-the-icons))
+
+(use-package treemacs-tab-bar :after treemacs)
+#+end_src
+
 ** Buffer-Move + Buffer Keybinds
 
 This file gives us the ability to move buffers up/down/left/right.
@@ -344,7 +376,7 @@ This file gives us the ability to move buffers up/down/left/right.
 
 (jawadcode/leader-keys
   ;; General Buffer Keybinds
-  "b"   '(:ignore t :wk "Buffer") ; Pseudo-keybind to provide a description of the "b" keybind group to which-key
+  "b"   '(:ignore t :wk "Buffer")
   "b s" '(switch-to-buffer :wk "Switch buffer")
   "b i" '(ibuffer :wk "Interactive buffer")
   "b x" '(kill-this-buffer :wk "Kill this buffer")
@@ -375,9 +407,9 @@ treemacs.
 
 * Appearance
 
-** Theme (Standard-Themes Light)
+** Theme (Standard-Themes Light, Disabled)
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (use-package standard-themes
   :custom
   ;; Read the doc string of each of those user options.  These are some
@@ -455,15 +487,15 @@ importantly, it has a better emacs logo.
 #+begin_src emacs-lisp
 (use-package dashboard
   :after (all-the-icons projectile)
-  :custom
-  (initial-buffer-choice (lambda () (get-buffer-create dashboard-buffer-name)))
-  (dashboard-startup-banner 'logo)
-  (dashboard-icon-type 'all-the-icons)
-  (dashboard-projects-backend 'projectile)
-  (dashboard-center-content t)
-  (dashboard-set-heading-icons t)
-  (dashboard-set-file-icons t)
-  (dashboard-startupify-list '(dashboard-insert-banner
+  :init
+  (setq initial-buffer-choice (lambda () (get-buffer-create dashboard-buffer-name)))
+  (setq dashboard-startup-banner 'logo)
+  (setq dashboard-icon-type 'all-the-icons)
+  (setq dashboard-projects-backend 'projectile)
+  (setq dashboard-center-content t)
+  (setq dashboard-set-heading-icons t)
+  (setq dashboard-set-file-icons t)
+  (setq dashboard-startupify-list '(dashboard-insert-banner
                                     dashboard-insert-newline
                                     dashboard-insert-banner-title
                                     dashboard-insert-newline
@@ -471,10 +503,10 @@ importantly, it has a better emacs logo.
                                     dashboard-insert-newline
                                     dashboard-insert-init-info
                                     dashboard-insert-items))
-  (dashboard-items '((recents   . 6)
-                     (projects  . 6)
-                     (bookmarks . 6)
-                     (registers . 6)))
+  (setq dashboard-items '((recents   . 6)
+                          (projects  . 6)
+                          (bookmarks . 6)
+                          (registers . 6)))
   :config
   (add-hook 'elpaca-after-init-hook #'dashboard-insert-startupify-lists)
   (add-hook 'elpaca-after-init-hook #'dashboard-initialize)
@@ -490,21 +522,26 @@ once again, I can't be bothered checking.
 (use-package solaire-mode :config (solaire-global-mode +1))
 #+end_src
 
-** Doom-Themes (Removed)
+** Enable Divider for Resizing Windows
+
+#+begin_src emacs-lisp
+(window-divider-mode)
+#+end_src
+
+** Doom-Themes (Material Dark)
 
 Causes flashes on startup, I'm content with Standard-Themes Light, but
 Material-Dark also looks rather nice.
 
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp
 (use-package doom-themes
+  :demand t
   :config
   (setq doom-themes-enable-bold t
         doom-themes-enable-italic t)
   (load-theme 'doom-material-dark t)
 
   (doom-themes-visual-bell-config)
-  (setq doom-themes-treemacs-theme "doom-material-dark")
-  (doom-themes-treemacs-config)
   (doom-themes-org-config))
 #+end_src
 
@@ -736,6 +773,8 @@ tried and true tree-sitter package.
 
 ** Haskell-Mode
 
+I ~<$>~ love ~>>>~ reading ~>>=~ Haskell ~$~ code.
+
 #+begin_src emacs-lisp
 (use-package haskell-mode :commands haskell-mode)
 (use-package lsp-haskell
@@ -746,19 +785,65 @@ tried and true tree-sitter package.
 
 ** Lean4-Mode
 
+I love lean.
+
 #+begin_src emacs-lisp
 (use-package lean4-mode
-  :after (lsp-mode)
-  :straight (lean4-mode
-             :type git
-             :host github
-             :repo "leanprover/lean4-mode"
-             :file ("*.el" "data"))
-  :commands (lean4-mode))
+  :ensure (lean4-mode
+           :host github
+           :repo "leanprover/lean4-mode"
+           :files ("*.el" "data"))
+  :commands lean4-mode)
+#+end_src
+
+** Idris-Mode
+
+Doesn't support Windows, probably won't for a while considering it's still mostly
+an academic endeavour.
+
+#+begin_src emacs-lisp
+(use-package idris2-mode
+  :ensure (idris2-mode
+           :host github
+           :repo "idris-community/idris2-mode")
+  :commands idris2-mode)
 #+end_src
 
 ** Meson-Mode
 
+The only usable C/C++ build system.
+
 #+begin_src emacs-lisp
 (use-package meson-mode :commands meson-mode)
+#+end_src
+
+** CMake-Mode
+
+This is only for the purposes of contributing to and working with other
+[unenlightened] peoples' projects.
+
+#+begin_src emacs-lisp
+(use-package cmake-mode :commands cmake-mode)
+#+end_src
+
+** Latex (AUCTeX + more)
+
+LaTeX is miserable to write without a billion different plugins, so naturally
+I'm just copying the ones that doom emacs uses and configuring to my liking.
+
+Tangling for the following codeblock is disabled right now, as it is incomplete
+and will be a bit of an undertaking to get this working reliably and add my own
+customisations (i.e. not just blindly copying doom emacs), likely requiring a
+bit of experimentation.
+
+#+begin_src emacs-lisp :tangle no
+(use-package auctex)
+(use-package adaptive-wrap)
+(use-package latex-preview-pane)
+(use-package evil-tex)
+(use-package auctex-latexmk)
+(use-package cdlatex)
+(use-package company-auctex :after company)
+(use-package company-reftex :after company)
+(use-package company-math :after company)
 #+end_src

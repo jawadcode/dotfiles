@@ -114,7 +114,7 @@
 (jawadcode/leader-keys
   "t"   '(:ignore t :wk "Toggle")
   "t l" '(display-line-numbers-mode :wk "Toggle line numbers")
-  "t t" '(visual-line-mode :wk "Toggle truncated lines"))
+  "t v" '(visual-line-mode :wk "Toggle visual-line-mode"))
 
 (use-package sudo-edit
   :config
@@ -156,9 +156,7 @@
   :config (evil-collection-init)
   :diminish evil-collection-unimpaired-mode)
 
-(use-package evil-anzu
-  :after evil
-  :config (require 'evil-anzu))
+(use-package evil-anzu :after evil)
 
 (use-package evil-tutor)
 
@@ -177,11 +175,24 @@
   (which-key-idle-delay 0.1)
   :diminish which-key-mode)
 
+(use-package treemacs
+  :config
+  (jawadcode/leader-keys
+    "t t" '((lambda () (treemacs)) :wk "Toggle treemacs")))
+
+(use-package treemacs-evil :after (treemacs evil))
+
+(use-package treemacs-projectile :after (treemacs projectile))
+
+(use-package treemacs-all-the-icons :after (treemacs all-the-icons))
+
+(use-package treemacs-tab-bar :after treemacs)
+
 (load (concat user-emacs-directory "buffer-move/buffer-move.el"))
 
 (jawadcode/leader-keys
   ;; General Buffer Keybinds
-  "b"   '(:ignore t :wk "Buffer") ; Pseudo-keybind to provide a description of the "b" keybind group to which-key
+  "b"   '(:ignore t :wk "Buffer")
   "b s" '(switch-to-buffer :wk "Switch buffer")
   "b i" '(ibuffer :wk "Interactive buffer")
   "b x" '(kill-this-buffer :wk "Kill this buffer")
@@ -201,34 +212,6 @@
   (jawadcode/leader-keys
     "p" '(projectile-command-map :wk "Projectile"))
   :diminish projectile-mode)
-
-(use-package standard-themes
-  :custom
-  ;; Read the doc string of each of those user options.  These are some
-  ;; sample values.
-  (standard-themes-bold-constructs t)
-  (standard-themes-italic-constructs t)
-  (standard-themes-disable-other-themes t)
-  (standard-themes-mixed-fonts t)
-  (standard-themes-variable-pitch-ui t)
-  (standard-themes-prompts '(extrabold italic))
-  ;; more complex alist to set weight, height, and optional
-  ;; `variable-pitch' per heading level (t is for any level not
-  ;; specified):
-  (standard-themes-headings
-  '((0 . (variable-pitch light 1.8))
-    (1 . (variable-pitch light 1.7))
-    (2 . (variable-pitch light 1.6))
-    (3 . (variable-pitch semilight 1.5))
-    (4 . (variable-pitch semilight 1.4))
-    (5 . (variable-pitch 1.3))
-    (6 . (variable-pitch 1.2))
-    (7 . (variable-pitch 1.1))
-    (agenda-date . (1.2))
-    (agenda-structure . (variable-pitch light 1.7))
-    (t . (variable-pitch 1.0))))
-  :config
-  (standard-themes-load-light)) ; OR (standard-themes-load-dark))
 
 (use-package all-the-icons
   :if (display-graphic-p))
@@ -261,15 +244,15 @@
 
 (use-package dashboard
   :after (all-the-icons projectile)
-  :custom
-  (initial-buffer-choice (lambda () (get-buffer-create dashboard-buffer-name)))
-  (dashboard-startup-banner 'logo)
-  (dashboard-icon-type 'all-the-icons)
-  (dashboard-projects-backend 'projectile)
-  (dashboard-center-content t)
-  (dashboard-set-heading-icons t)
-  (dashboard-set-file-icons t)
-  (dashboard-startupify-list '(dashboard-insert-banner
+  :init
+  (setq initial-buffer-choice (lambda () (get-buffer-create dashboard-buffer-name)))
+  (setq dashboard-startup-banner 'logo)
+  (setq dashboard-icon-type 'all-the-icons)
+  (setq dashboard-projects-backend 'projectile)
+  (setq dashboard-center-content t)
+  (setq dashboard-set-heading-icons t)
+  (setq dashboard-set-file-icons t)
+  (setq dashboard-startupify-list '(dashboard-insert-banner
                                     dashboard-insert-newline
                                     dashboard-insert-banner-title
                                     dashboard-insert-newline
@@ -277,16 +260,28 @@
                                     dashboard-insert-newline
                                     dashboard-insert-init-info
                                     dashboard-insert-items))
-  (dashboard-items '((recents   . 6)
-                     (projects  . 6)
-                     (bookmarks . 6)
-                     (registers . 6)))
+  (setq dashboard-items '((recents   . 6)
+                          (projects  . 6)
+                          (bookmarks . 6)
+                          (registers . 6)))
   :config
   (add-hook 'elpaca-after-init-hook #'dashboard-insert-startupify-lists)
   (add-hook 'elpaca-after-init-hook #'dashboard-initialize)
   (dashboard-setup-startup-hook))
 
 (use-package solaire-mode :config (solaire-global-mode +1))
+
+(window-divider-mode)
+
+(use-package doom-themes
+  :demand t
+  :config
+  (setq doom-themes-enable-bold t
+        doom-themes-enable-italic t)
+  (load-theme 'doom-material-dark t)
+
+  (doom-themes-visual-bell-config)
+  (doom-themes-org-config))
 
 (setq org-indent-mode nil)
 
@@ -419,12 +414,18 @@
   (add-hook 'haskell-literate-mode-hook #'lsp))
 
 (use-package lean4-mode
-  :after (lsp-mode)
-  :straight (lean4-mode
-             :type git
-             :host github
-             :repo "leanprover/lean4-mode"
-             :file ("*.el" "data"))
-  :commands (lean4-mode))
+  :ensure (lean4-mode
+           :host github
+           :repo "leanprover/lean4-mode"
+           :files ("*.el" "data"))
+  :commands lean4-mode)
+
+(use-package idris2-mode
+  :ensure (idris2-mode
+           :host github
+           :repo "idris-community/idris2-mode")
+  :commands idris2-mode)
 
 (use-package meson-mode :commands meson-mode)
+
+(use-package cmake-mode :commands cmake-mode)
