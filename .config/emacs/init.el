@@ -1,35 +1,41 @@
 ;;; init.el --- Personal configuration -*- lexical-binding: t -*-
 
-(if (eq system-type 'windows-nt)
-  (progn
-    (set-face-attribute 'default nil
-                        :font "Iosevka Term SS07"
-                        :height 150
-                        :weight 'regular)
-    (set-face-attribute 'variable-pitch nil
-                        :font "Segoe UI"
-                        :height 150
-                        :weight 'regular)
-    (set-face-attribute 'fixed-pitch nil
-                        :font "Iosevka Term SS07"
-                        :height 150
-                        :weight 'regular)))
+(pcase system-type
+  ('windows-nt
+   (progn
+     (set-face-attribute 'default nil
+                         :font "Iosevka Term SS07"
+                         :height 150
+                         :weight 'regular)
+     (set-face-attribute 'variable-pitch nil
+                         :font "Segoe UI"
+                         :height 150
+                         :weight 'regular)
+     (set-face-attribute 'fixed-pitch nil
+                         :font "Iosevka Term SS07"
+                         :height 150
+                         :weight 'regular)))
+  ('gnu/linux ())) ; Already set in early-init.el
 
 (setq default-directory (getenv "HOME"))
+
+(setq backup-directory-alist '((".*" . (concat user-emacs-directory "backups"))))
 
 (global-set-key (kbd "C-+") 'text-scale-increase)
 (global-set-key (kbd "C--") 'text-scale-decrease)
 (global-set-key (kbd "<C-wheel-up>") 'text-scale-increase)
 (global-set-key (kbd "<C-wheel-down>") 'text-scale-decrease)
 
+(indent-tabs-mode -1)
+
 (defvar elpaca-installer-version 0.7)
 (defvar elpaca-directory (expand-file-name "elpaca/" user-emacs-directory))
 (defvar elpaca-builds-directory (expand-file-name "builds/" elpaca-directory))
 (defvar elpaca-repos-directory (expand-file-name "repos/" elpaca-directory))
 (defvar elpaca-order '(elpaca :repo "https://github.com/progfolio/elpaca.git"
-                              :ref nil :depth 1
-                              :files (:defaults "elpaca-test.el" (:exclude "extensions"))
-                              :build (:not elpaca--activate-package)))
+			      :ref nil :depth 1
+			      :files (:defaults "elpaca-test.el" (:exclude "extensions"))
+			      :build (:not elpaca--activate-package)))
 (let* ((repo  (expand-file-name "elpaca/" elpaca-repos-directory))
        (build (expand-file-name "elpaca/" elpaca-builds-directory))
        (order (cdr elpaca-order))
@@ -39,20 +45,20 @@
     (make-directory repo t)
     (when (< emacs-major-version 28) (require 'subr-x))
     (condition-case-unless-debug err
-        (if-let ((buffer (pop-to-buffer-same-window "*elpaca-bootstrap*"))
-                 ((zerop (apply #'call-process `("git" nil ,buffer t "clone"
-                                                 ,@(when-let ((depth (plist-get order :depth)))
-                                                     (list (format "--depth=%d" depth) "--no-single-branch"))
-                                                 ,(plist-get order :repo) ,repo))))
-                 ((zerop (call-process "git" nil buffer t "checkout"
-                                       (or (plist-get order :ref) "--"))))
-                 (emacs (concat invocation-directory invocation-name))
-                 ((zerop (call-process emacs nil buffer nil "-Q" "-L" "." "--batch"
-                                       "--eval" "(byte-recompile-directory \".\" 0 'force)")))
-                 ((require 'elpaca))
-                 ((elpaca-generate-autoloads "elpaca" repo)))
-            (progn (message "%s" (buffer-string)) (kill-buffer buffer))
-          (error "%s" (with-current-buffer buffer (buffer-string))))
+	(if-let ((buffer (pop-to-buffer-same-window "*elpaca-bootstrap*"))
+		 ((zerop (apply #'call-process `("git" nil ,buffer t "clone"
+						 ,@(when-let ((depth (plist-get order :depth)))
+						     (list (format "--depth=%d" depth) "--no-single-branch"))
+						 ,(plist-get order :repo) ,repo))))
+		 ((zerop (call-process "git" nil buffer t "checkout"
+				       (or (plist-get order :ref) "--"))))
+		 (emacs (concat invocation-directory invocation-name))
+		 ((zerop (call-process emacs nil buffer nil "-Q" "-L" "." "--batch"
+				       "--eval" "(byte-recompile-directory \".\" 0 'force)")))
+		 ((require 'elpaca))
+		 ((elpaca-generate-autoloads "elpaca" repo)))
+	    (progn (message "%s" (buffer-string)) (kill-buffer buffer))
+	  (error "%s" (with-current-buffer buffer (buffer-string))))
       ((error) (warn "%s" err) (delete-directory repo 'recursive))))
   (unless (require 'elpaca-autoloads nil t)
     (require 'elpaca)
@@ -76,7 +82,8 @@
 
 (elpaca-wait)
 
-(global-display-line-numbers-mode 1)
+(add-hook 'text-mode-hook #'display-line-numbers-mode)
+(add-hook 'prog-mode-hook #'display-line-numbers-mode)
 (global-visual-line-mode t)
 (diminish 'visual-line-mode)
 
@@ -131,6 +138,7 @@
   (evil-split-window-below t)
   :init
   :config
+  (evil-set-undo-system 'undo-redo)
   (evil-mode 1)
   (jawadcode/leader-keys
     "w"   '(:ignore t :wk "Windows")
@@ -160,14 +168,6 @@
 
 (use-package evil-tutor)
 
-;; Turns off elpaca-use-package-mode current declaration
-;; Note this will cause the declaration to be interpreted immediately (not deferred).
-;; Useful for configuring built-in emacs features.
-(use-package emacs :ensure nil :config (setq ring-bell-function #'ignore))
-
-;; Don't install anything. Defer execution of BODY
-(elpaca nil (message "deferred"))
-
 (use-package which-key
   :init (which-key-mode 1)
   :custom
@@ -185,6 +185,8 @@
 (use-package treemacs-projectile :after (treemacs projectile))
 
 (use-package treemacs-all-the-icons :after (treemacs all-the-icons))
+
+(use-package treemacs-icons-dired)
 
 (use-package treemacs-tab-bar :after treemacs)
 
@@ -218,7 +220,8 @@
 
 ;; This enables all-the-icons in the dired file manager
 (use-package all-the-icons-dired
-  :hook (dired-mode . (lambda () (all-the-icons-dired-mode t))))
+  :after all-the-icons
+  :hook (dired-mode . all-the-icons-dired-mode))
 
 (use-package ligature
   :config
@@ -226,18 +229,18 @@
   (ligature-set-ligatures
    'prog-mode
    '("|||>" "<|||" "<==>" "<!--" "####" "~~>" "***" "||=" "||>"
-    ":::" "::=" "=:=" "===" "==>" "=!=" "=>>" "=<<" "=/=" "!=="
-    "!!." ">=>" ">>=" ">>>" ">>-" ">->" "->>" "-->" "---" "-<<"
-    "<~~" "<~>" "<*>" "<||" "<|>" "<$>" "<==" "<=>" "<=<" "<->"
-    "<--" "<-<" "<<=" "<<-" "<<<" "<+>" "</>" "###" "#_(" "..<"
-    "..." "+++" "/==" "///" "_|_" "www" "&&" "^=" "~~" "~@" "~="
-    "~>" "~-" "**" "*>" "*/" "||" "|}" "|]" "|=" "|>" "|-" "{|"
-    "[|" "]#" "::" ":=" ":>" ":<" "$>" "==" "=>" "!=" "!!" ">:"
-    ">=" ">>" ">-" "-~" "-|" "->" "--" "-<" "<~" "<*" "<|" "<:"
-    "<$" "<=" "<>" "<-" "<<" "<+" "</" "#{" "#[" "#:" "#=" "#!"
-    "##" "#(" "#?" "#_" "%%" ".=" ".-" ".." ".?" "+>" "++" "?:"
-    "?=" "?." "??" ";;" "/*" "/=" "/>" "//" "__" "~~" "(*" "*)"
-    "\\\\" "://"))
+     ":::" "::=" "=:=" "===" "==>" "=!=" "=>>" "=<<" "=/=" "!=="
+     "!!." ">=>" ">>=" ">>>" ">>-" ">->" "->>" "-->" "---" "-<<"
+     "<~~" "<~>" "<*>" "<||" "<|>" "<$>" "<==" "<=>" "<=<" "<->"
+     "<--" "<-<" "<<=" "<<-" "<<<" "<+>" "</>" "###" "#_(" "..<"
+     "..." "+++" "/==" "///" "_|_" "www" "&&" "^=" "~~" "~@" "~="
+     "~>" "~-" "**" "*>" "*/" "||" "|}" "|]" "|=" "|>" "|-" "{|"
+     "[|" "]#" "::" ":=" ":>" ":<" "$>" "==" "=>" "!=" "!!" ">:"
+     ">=" ">>" ">-" "-~" "-|" "->" "--" "-<" "<~" "<*" "<|" "<:"
+     "<$" "<=" "<>" "<-" "<<" "<+" "</" "#{" "#[" "#:" "#=" "#!"
+     "##" "#(" "#?" "#_" "%%" ".=" ".-" ".." ".?" "+>" "++" "?:"
+     "?=" "?." "??" ";;" "/*" "/=" "/>" "//" "__" "~~" "(*" "*)"
+     "\\\\" "://"))
   ;; Enables ligature checks globally in all buffers. You can also do it
   ;; per mode with `ligature-mode'.
   (global-ligature-mode t))
@@ -262,8 +265,7 @@
                                     dashboard-insert-items))
   (setq dashboard-items '((recents   . 6)
                           (projects  . 6)
-                          (bookmarks . 6)
-                          (registers . 6)))
+                          (bookmarks . 6)))
   :config
   (add-hook 'elpaca-after-init-hook #'dashboard-insert-startupify-lists)
   (add-hook 'elpaca-after-init-hook #'dashboard-initialize)
@@ -282,6 +284,16 @@
 
   (doom-themes-visual-bell-config)
   (doom-themes-org-config))
+
+(use-package centaur-tabs
+  :after (all-the-icons)
+  :config
+  (setq centaur-tabs-style "wave")
+  (centaur-tabs-mode t)
+  :hook (dashboard-mode . centaur-tabs-local-mode)
+  :bind
+  ("C-<tab>" . centaur-tabs-backward)
+  ("C-S-<tab>" . centaur-tabs-forward))
 
 (setq org-indent-mode nil)
 
@@ -336,9 +348,6 @@
   :config (counsel-mode)
   :diminish counsel-mode)
 
-(use-package all-the-icons-ivy-rich
-  :init (all-the-icons-ivy-rich-mode 1))
-
 ;; Adds bling to our ivy completions
 (use-package ivy-rich
   :after ivy
@@ -350,7 +359,11 @@
                           ivy-rich-path-style 'abbrev)
   :config
   (ivy-set-display-transformer 'ivy-switch-buffer
-                               'ivy-rich-switch-buffer-transform))
+                              'ivy-rich-switch-buffer-transform))
+
+(use-package all-the-icons-ivy-rich
+  :after ivy-rich
+  :init (all-the-icons-ivy-rich-mode 1))
 
 (use-package company
   :config
@@ -387,13 +400,14 @@
 (use-package tree-sitter-langs)
 
 (use-package lsp-mode
-  :hook (((rust-mode             . lsp)
-          (c-mode                . lsp)
-          (c++-mode              . lsp)
-          (meson-mode            . lsp))
-         (lsp-mode . lsp-enable-which-key-integration))
+  :hook ((rust-mode . lsp)
+          (c-mode . lsp)
+          (c++-mode . lsp)
+          (meson-mode . lsp)
+          (lsp-mode . lsp-enable-which-key-integration))
   :config
   (evil-define-key 'normal lsp-mode-map (kbd "SPC l") lsp-command-map)
+  (setq lsp-inlay-hint-enable t)
   :commands lsp
   :diminish flymake-mode)
 
@@ -404,14 +418,15 @@
 (use-package rust-mode :commands rust-mode)
 
 (use-package lsp-pyright
-  :config
-  (add-hook 'pyright-mode-hook #'lsp))
+  :hook (python-mode . (lambda ()
+                         (require 'lsp-pyright)
+                         (lsp))))  ; or lsp-deferred
 
-(use-package haskell-mode :commands haskell-mode)
 (use-package lsp-haskell
-  :config
-  (add-hook 'haskell-mode-hook #'lsp)
-  (add-hook 'haskell-literate-mode-hook #'lsp))
+  :hook ((haskell-mode . lsp)
+         (haskell-literate-mode . lsp))
+  :config (add-hook 'haskell-mode-hook
+                    (lambda () (setq evil-shift-width 2))))
 
 (use-package lean4-mode
   :ensure (lean4-mode
@@ -429,3 +444,5 @@
 (use-package meson-mode :commands meson-mode)
 
 (use-package cmake-mode :commands cmake-mode)
+
+(use-package yuck-mode)

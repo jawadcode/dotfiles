@@ -1,10 +1,8 @@
-auto-save-list/
 .cache/
+.lsp-session-v1
+auto-save-list/
+backups/
 eln-cache/
 elpaca/
-init.el~
-init.org~
-.lsp-session-v1
 projectile-bookmarks.eld
-projectile.cache
 recentf
