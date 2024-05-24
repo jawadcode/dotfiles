@@ -1,25 +1,30 @@
 ;;; init.el --- Personal configuration -*- lexical-binding: t -*-
 
+(set-face-attribute 'default nil
+                    :font "Iosevka Term SS07"
+                    :height 135
+                    :weight 'regular)
 (pcase system-type
   ('windows-nt
-   (progn
-     (set-face-attribute 'default nil
-                         :font "Iosevka Term SS07"
-                         :height 150
-                         :weight 'regular)
-     (set-face-attribute 'variable-pitch nil
-                         :font "Segoe UI"
-                         :height 150
-                         :weight 'regular)
-     (set-face-attribute 'fixed-pitch nil
-                         :font "Iosevka Term SS07"
-                         :height 150
-                         :weight 'regular)))
-  ('gnu/linux ())) ; Already set in early-init.el
+   (set-face-attribute 'variable-pitch nil
+                       :font "Segoe UI"
+                       :height 135
+                       :weight 'regular))
+  ('gnu/linux
+   (set-face-attribute 'variable-pitch nil
+                       :font "Noto Sans"
+                       :height 135
+                       :weight 'regular)))
+(set-face-attribute 'fixed-pitch nil
+                    :font "Iosevka Term SS07"
+                    :height 135
+                    :weight 'regular)
 
-(setq default-directory (getenv "HOME"))
+(setq default-directory (concat (getenv "HOME") "/"))
 
-(setq backup-directory-alist '((".*" . (concat user-emacs-directory "backups"))))
+(setq backup-directory-alist `((".*" . ,(concat user-emacs-directory "backups"))))
+
+(setq custom-file (concat user-emacs-directory "custom.el"))
 
 (global-set-key (kbd "C-+") 'text-scale-increase)
 (global-set-key (kbd "C--") 'text-scale-decrease)
@@ -27,60 +32,35 @@
 (global-set-key (kbd "<C-wheel-down>") 'text-scale-decrease)
 
 (indent-tabs-mode -1)
+(electric-indent-mode -1)
 
-(defvar elpaca-installer-version 0.7)
-(defvar elpaca-directory (expand-file-name "elpaca/" user-emacs-directory))
-(defvar elpaca-builds-directory (expand-file-name "builds/" elpaca-directory))
-(defvar elpaca-repos-directory (expand-file-name "repos/" elpaca-directory))
-(defvar elpaca-order '(elpaca :repo "https://github.com/progfolio/elpaca.git"
-			      :ref nil :depth 1
-			      :files (:defaults "elpaca-test.el" (:exclude "extensions"))
-			      :build (:not elpaca--activate-package)))
-(let* ((repo  (expand-file-name "elpaca/" elpaca-repos-directory))
-       (build (expand-file-name "elpaca/" elpaca-builds-directory))
-       (order (cdr elpaca-order))
-       (default-directory repo))
-  (add-to-list 'load-path (if (file-exists-p build) build repo))
-  (unless (file-exists-p repo)
-    (make-directory repo t)
-    (when (< emacs-major-version 28) (require 'subr-x))
-    (condition-case-unless-debug err
-	(if-let ((buffer (pop-to-buffer-same-window "*elpaca-bootstrap*"))
-		 ((zerop (apply #'call-process `("git" nil ,buffer t "clone"
-						 ,@(when-let ((depth (plist-get order :depth)))
-						     (list (format "--depth=%d" depth) "--no-single-branch"))
-						 ,(plist-get order :repo) ,repo))))
-		 ((zerop (call-process "git" nil buffer t "checkout"
-				       (or (plist-get order :ref) "--"))))
-		 (emacs (concat invocation-directory invocation-name))
-		 ((zerop (call-process emacs nil buffer nil "-Q" "-L" "." "--batch"
-				       "--eval" "(byte-recompile-directory \".\" 0 'force)")))
-		 ((require 'elpaca))
-		 ((elpaca-generate-autoloads "elpaca" repo)))
-	    (progn (message "%s" (buffer-string)) (kill-buffer buffer))
-	  (error "%s" (with-current-buffer buffer (buffer-string))))
-      ((error) (warn "%s" err) (delete-directory repo 'recursive))))
-  (unless (require 'elpaca-autoloads nil t)
-    (require 'elpaca)
-    (elpaca-generate-autoloads "elpaca" repo)
-    (load "./elpaca-autoloads")))
-(add-hook 'after-init-hook #'elpaca-process-queues)
-(elpaca `(,@elpaca-order))
-;; Windows moment
-(elpaca-no-symlink-mode)
+(defmacro linux-specific! (body)
+  (pcase system-type
+     ('gnu/linux body)
+     (_ ())))
 
-(elpaca elpaca-use-package
-  (elpaca-use-package-mode)
-  (setq use-package-always-ensure t))
+(defvar bootstrap-version)
+(let ((bootstrap-file
+       (expand-file-name
+        "straight/repos/straight.el/bootstrap.el"
+        (or (bound-and-true-p straight-base-dir)
+            user-emacs-directory)))
+      (bootstrap-version 7))
+  (unless (file-exists-p bootstrap-file)
+    (with-current-buffer
+        (url-retrieve-synchronously
+         "https://raw.githubusercontent.com/radian-software/straight.el/develop/install.el"
+         'silent 'inhibit-cookies)
+      (goto-char (point-max))
+      (eval-print-last-sexp)))
+  (load bootstrap-file nil 'nomessage))
 
-;; Block until current queue processed.
-(elpaca-wait)
+(straight-use-package 'use-package)
+(setq straight-use-package-by-default t)
 
 (use-package diminish)
 
 (use-package general :config (general-evil-setup))
-
-(elpaca-wait)
 
 (add-hook 'text-mode-hook #'display-line-numbers-mode)
 (add-hook 'prog-mode-hook #'display-line-numbers-mode)
@@ -99,7 +79,7 @@
 (general-create-definer jawadcode/leader-keys
   :states '(normal insert visual emacs)
   :keymaps 'override
-  :prefix "SPC" ; The only valid leader key
+  :prefix "SPC"
   :global-prefix "M-SPC")
 
 ;; Miscellaneous keybinds
@@ -108,27 +88,24 @@
   "f"   '(:ignore t :wk "File")
   "f r" '(counsel-recentf :wk "Find recent files")
   "f c" '((lambda () (interactive) (find-file "~/.config/emacs/init.org")) :wk "Open emacs config")
-  ";"   '(comment-line :wk "Comment lines"))
-
-;; Help keybinds
-(jawadcode/leader-keys
+  ";"   '(comment-line :wk "Comment lines")
+  ;; Help keybinds
   "h" '(:ignore t :wk "Help")
   "h f" '(describe-function :wk "Describe function")
   "h v" '(describe-variable :wk "Describe variable")
-  "h r" '((lambda () (interactive) (load-file user-init-file) (load-file user-init-file)) :wk "Reload config"))
-
-;; Toggle keybinds
-(jawadcode/leader-keys
+  "h r" '((lambda () (interactive) (load-file user-init-file) (load-file user-init-file)) :wk "Reload config")
+  ;; Toggle keybinds
   "t"   '(:ignore t :wk "Toggle")
   "t l" '(display-line-numbers-mode :wk "Toggle line numbers")
   "t v" '(visual-line-mode :wk "Toggle visual-line-mode"))
 
-(use-package sudo-edit
-  :config
-  (jawadcode/leader-keys
-    "s" '(:ignore t :wk "Sudo Edit")
-    "s f" '(sudo-edit-find-file :wk "Sudo find file")
-    "s e" '(sudo-edit :wk "Sudo edit file")))
+(linux-specific!
+ (use-package sudo-edit
+   :config
+   (jawadcode/leader-keys
+     "s" '(:ignore t :wk "Sudo Edit")
+     "s f" '(sudo-edit-find-file :wk "Sudo find file")
+     "s e" '(sudo-edit :wk "Sudo edit file"))))
 
 (use-package evil
   :custom
@@ -190,7 +167,7 @@
 
 (use-package treemacs-tab-bar :after treemacs)
 
-(load (concat user-emacs-directory "buffer-move/buffer-move.el"))
+(native-compile-async (concat user-emacs-directory "buffer-move/buffer-move.el"))
 
 (jawadcode/leader-keys
   ;; General Buffer Keybinds
@@ -214,6 +191,18 @@
   (jawadcode/leader-keys
     "p" '(projectile-command-map :wk "Projectile"))
   :diminish projectile-mode)
+
+(linux-specific!
+ (use-package pdf-tools
+   :mode ("\\.pdf\\'" . pdf-view-mode)
+   :config
+   (setq-default pdf-view-display-size 'fit-width)
+   (setq pdf-view-use-scaling t
+	 pdf-view-use-imagemagick nil)
+   (add-hook 'pdf-view-mode-hook
+	     (lambda ()
+	       (setq-local evil-normal-state-cursor (list nil))))
+   (evil-make-overriding-map pdf-view-mode-map 'normal)))
 
 (use-package all-the-icons
   :if (display-graphic-p))
@@ -267,8 +256,6 @@
                           (projects  . 6)
                           (bookmarks . 6)))
   :config
-  (add-hook 'elpaca-after-init-hook #'dashboard-insert-startupify-lists)
-  (add-hook 'elpaca-after-init-hook #'dashboard-initialize)
   (dashboard-setup-startup-hook))
 
 (use-package solaire-mode :config (solaire-global-mode +1))
@@ -279,8 +266,9 @@
   :demand t
   :config
   (setq doom-themes-enable-bold t
-        doom-themes-enable-italic t)
-  (load-theme 'doom-material-dark t)
+        doom-themes-enable-italic t
+        doom-themes-padded-modeline t)
+  (load-theme 'leuven t)
 
   (doom-themes-visual-bell-config)
   (doom-themes-org-config))
@@ -288,11 +276,12 @@
 (use-package centaur-tabs
   :after (all-the-icons)
   :config
-  (setq centaur-tabs-style "wave")
+  (setq centaur-tabs-style "bar")
+  (setq centaur-tabs-set-bar 'over)
   (centaur-tabs-mode t)
   :hook (dashboard-mode . centaur-tabs-local-mode)
   :bind
-  ("C-<tab>" . centaur-tabs-backward)
+  ("C-<tab>"   . centaur-tabs-backward)
   ("C-S-<tab>" . centaur-tabs-forward))
 
 (setq org-indent-mode nil)
@@ -319,7 +308,7 @@
 
 (use-package toc-org
   :commands toc-org-enable
-  :init (add-hook 'org-mode-hook 'toc-org-enable))
+  :hook (org-mode . toc-org-enable))
 
 (add-hook 'org-mode-hook 'org-indent-mode)
 (use-package org-bullets)
@@ -330,7 +319,7 @@
 (use-package ivy
   ;; :bind
   ;; (("C-c C-r" . ivy-resume)
-  ;;  ("C-x B" . ivy-switch-buffer-other-window))
+  ;;  ("C-x B"   . ivy-switch-buffer-other-window))
   :custom
   (ivy-use-virtual-buffers t)
   (ivy-count-format "(%d/%d) ")
@@ -366,10 +355,11 @@
   :init (all-the-icons-ivy-rich-mode 1))
 
 (use-package company
+  :init (setq company-tooltip-align-annotations t)
   :config
-  (define-key company-active-map (kbd "C-n") nil)
-  (define-key company-active-map (kbd "C-p") nil)
-  (define-key company-active-map (kbd "RET") nil)
+  (define-key company-active-map (kbd "C-n") nil) ; Select next
+  (define-key company-active-map (kbd "C-p") nil) ; Select previous
+  (define-key company-active-map (kbd "RET") nil) ; Complete selection
   (define-key company-active-map (kbd "M-j") #'company-select-next)
   (define-key company-active-map (kbd "M-k") #'company-select-previous)
   (define-key company-active-map (kbd "<tab>") #'company-complete-selection)
@@ -383,7 +373,7 @@
   :diminish company-box-mode)
 
 (use-package smartparens-mode
-  :ensure smartparens
+  :straight smartparens
   :hook (prog-mode text-mode markdown-mode)
   :config (require 'smartparens-config)
   :diminish smartparens-mode)
@@ -400,11 +390,12 @@
 (use-package tree-sitter-langs)
 
 (use-package lsp-mode
-  :hook ((rust-mode . lsp)
-          (c-mode . lsp)
-          (c++-mode . lsp)
-          (meson-mode . lsp)
-          (lsp-mode . lsp-enable-which-key-integration))
+  :hook ((rust-mode       . lsp)
+          (c-mode         . lsp)
+          (c++-mode       . lsp)
+          (meson-mode     . lsp)
+          (conf-toml-mode . lsp)
+          (lsp-mode       . lsp-enable-which-key-integration))
   :config
   (evil-define-key 'normal lsp-mode-map (kbd "SPC l") lsp-command-map)
   (setq lsp-inlay-hint-enable t)
@@ -423,26 +414,181 @@
                          (lsp))))  ; or lsp-deferred
 
 (use-package lsp-haskell
-  :hook ((haskell-mode . lsp)
-         (haskell-literate-mode . lsp))
-  :config (add-hook 'haskell-mode-hook
-                    (lambda () (setq evil-shift-width 2))))
+  :hook ((haskell-mode          . lsp)
+         (haskell-literate-mode . lsp)
+         (haskell-mode          . (lambda () (setq evil-shift-width 2)))))
 
 (use-package lean4-mode
-  :ensure (lean4-mode
-           :host github
-           :repo "leanprover/lean4-mode"
-           :files ("*.el" "data"))
+  :straight (lean4-mode
+             :host github
+             :repo "leanprover/lean4-mode"
+             :files ("*.el" "data"))
   :commands lean4-mode)
 
-(use-package idris2-mode
-  :ensure (idris2-mode
-           :host github
-           :repo "idris-community/idris2-mode")
-  :commands idris2-mode)
+(linux-specific!
+ (use-package idris2-mode
+   :straight (idris2-mode
+	      :host github
+	      :repo "idris-community/idris2-mode")
+   :commands idris2-mode))
 
 (use-package meson-mode :commands meson-mode)
 
 (use-package cmake-mode :commands cmake-mode)
 
-(use-package yuck-mode)
+(use-package latex
+  :straight auctex
+  :defer t
+  :custom (bibtex-dialect 'biblatex)
+  :mode ("\\.tex\\'" . LaTeX-mode)
+  :hook (TeX-mode . prettify-symbols-mode)
+  :init
+  (setq-default TeX-master t)
+  (setq TeX-parse-self t
+        TeX-auto-save t
+        TeX-auto-local ".auctex-auto"
+        TeX-style-local ".auctex-style"
+        TeX-source-correlate-mode t
+        TeX-source-correlate-method 'synctex
+        TeX-save-query nil
+        TeX-engine 'xetex
+        TeX-PDF-mode t)
+  :config
+  ;; Source: https://tex.stackexchange.com/a/86119/81279
+  (setq font-latex-match-reference-keywords
+        '(;; BibLaTeX
+          ("printbibliography" "[{")
+          ("addbibresource" "[{")
+          ;; Standard commands.
+          ("cite" "[{")
+          ("citep" "[{")
+          ("citet" "[{")
+          ("Cite" "[{")
+          ("parencite" "[{")
+          ("Parencite" "[{")
+          ("footcite" "[{")
+          ("footcitetext" "[{")
+          ;; Style-specific commands.
+          ("textcite" "[{")
+          ("Textcite" "[{")
+          ("smartcite" "[{")
+          ("Smartcite" "[{")
+          ("cite*" "[{")
+          ("parencite*" "[{")
+          ("supercite" "[{")
+          ;; Qualified citation lists.
+          ("cites" "[{")
+          ("Cites" "[{")
+          ("parencites" "[{")
+          ("Parencites" "[{")
+          ("footcites" "[{")
+          ("footcitetexts" "[{")
+          ("smartcites" "[{")
+          ("Smartcites" "[{")
+          ("textcites" "[{")
+          ("Textcites" "[{")
+          ("supercites" "[{")
+          ;; Style-independent commands.
+          ("autocite" "[{")
+          ("Autocite" "[{")
+          ("autocite*" "[{")
+          ("Autocite*" "[{")
+          ("autocites" "[{")
+          ("Autocites" "[{")
+          ;; Text commands.
+          ("citeauthor" "[{")
+          ("Citeauthor" "[{")
+          ("citetitle" "[{")
+          ("citetitle*" "[{")
+          ("citeyear" "[{")
+          ("citedate" "[{")
+          ("citeurl" "[{")
+          ;; Special commands.
+          ("fullcite" "[{")
+          ;; Cleveref.
+          ("cref" "{")
+          ("Cref" "{")
+          ("cpageref" "{")
+          ("Cpageref" "{")
+          ("cpagerefrange" "{")
+          ("Cpagerefrange" "{")
+          ("crefrange" "{")
+          ("Crefrange" "{")
+          ("labelcref" "{")))
+  (setq font-latex-match-textual-keywords
+        '(;; BibLaTeX
+          ("parentext" "{")
+          ("brackettext" "{")
+          ("hybridblockquote" "[{")
+          ;; Auxiliary commands.
+          ("textelp" "{")
+          ("textelp*" "{")
+          ("textins" "{")
+          ("textins*" "{")
+          ;; Subcaption.
+          ("subcaption" "[{")))
+  (setq font-latex-match-variable-keywords
+      '(;; Amsmath.
+        ("numberwithin" "{")
+        ;; Enumitem.
+        ("setlist" "[{")
+        ("setlist*" "[{")
+        ("newlist" "{")
+        ("renewlist" "{")
+        ("setlistdepth" "{")
+        ("restartlist" "{")
+        ("crefname" "{")))
+
+  (pcase system-type
+    ('windows-nt
+     (add-to-list 'TeX-view-program-list '("Okular" ("okular --noraise --unique file:%o" (mode-io-correlate "#src:%n%a"))))
+     (add-to-list 'TeX-view-program-selection '(output-pdf "Okular")))
+    ('gnu/linux
+     (add-to-list 'TeX-view-program-selection '(output-pdf "PDF Tools"))
+     (add-hook 'TeX-after-compilation-finished-functions #'TeX-revert-document-buffer)))
+
+      (add-hook 'tex-mode-local-vars-hook #'lsp)
+      (add-hook 'latex-mode-local-vars-hook #'lsp)
+
+      (require 'tex-fold)
+      (add-hook 'LaTeX-mode-hook #'TeX-fold-mode)
+      (require 'preview)
+      (add-hook 'LaTeX-mode-hook #'LaTeX-preview-setup))
+
+(use-package auctex-latexmk
+      :after latex
+      :hook (LaTeX-mode . (lambda () ((setq TeX-command-default "LatexMk"))))
+      :init (setq auctex-latexmk-inherit-TeX-PDF-mode t)
+      :config (auctex-latexmk-setup))
+(use-package evil-tex
+      :after latex
+      :hook (LaTeX-mode . evil-tex-mode))
+(use-package cdlatex
+      :after latex
+      :hook ((LaTeX-mode . cdlatex-mode)
+	     (org-mode   . org-cdlatex-mode))
+      :config (setq cdlatex-use-dollar-to-ensure-math nil))
+
+(use-package company-auctex
+      :after latex
+      :config (company-auctex-init))
+
+(use-package company-reftex
+      :after latex
+      :config
+      (add-hook 'TeX-mode-hook
+		(lambda ()
+		  (setq-local company-backends
+			      (append
+				'(company-reftex-labels company-reftex-citations)
+                                company-backends)))))
+
+(use-package company-math
+      :after latex
+      :config
+      (add-hook 'TeX-mode-hook
+		(lambda ()
+		  (setq-local company-backends
+			      (append
+				'(company-math-symbols-latex company-math-symbols-unicode company-latex-commands)
+				company-backends)))))

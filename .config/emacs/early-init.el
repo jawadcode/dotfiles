@@ -15,23 +15,23 @@
       scroll-bar-mode nil
       column-number-mode t)
 
-; (add-to-list 'default-frame-alist '(foreground-color . "#EEFFFF"))
-; (add-to-list 'default-frame-alist '(background-color . "#212121"))
-; Causes flashes 🤔
-
+(set-face-attribute 'default nil
+                    :font "Iosevka Term SS07"
+                    :height 135
+                    :weight 'regular)
 (pcase system-type
-  ('windows-nt ()) ; Can't set font in early-init.el on Windows apparently
+  ('windows-nt
+   (set-face-attribute 'variable-pitch nil
+                       :font "Segoe UI"
+                       :height 135
+                       :weight 'regular))
   ('gnu/linux
-   (progn
-    (set-face-attribute 'default nil
-      :font "IosevkaTermSS07 Nerd Font"
-      :height 150
-      :weight 'regular)
-    (set-face-attribute 'variable-pitch nil
-      :font "Roboto"
-      :height 150
-      :weight 'regular)
-    (set-face-attribute 'fixed-pitch nil
-      :font "IosevkaTermSS07 Nerd Font"
-      :height 150
-      :weight 'regular))))
+   (set-face-attribute 'variable-pitch nil
+                       :font "Noto Sans"
+                       :height 135
+                       :weight 'regular)))
+(set-face-attribute 'fixed-pitch nil
+                    :font "Iosevka Term SS07"
+                    :height 135
+                    :weight 'regular)
+
