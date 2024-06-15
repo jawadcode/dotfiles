@@ -15,6 +15,9 @@
       scroll-bar-mode nil
       column-number-mode t)
 
+(set-language-environment "UTF-8")
+(prefer-coding-system 'utf-8)
+
 (set-face-attribute 'default nil
                     :font "Iosevka Term SS07"
                     :height 135

@@ -87,7 +87,7 @@
   "SPC" '(find-file :wk "Find file")
   "f"   '(:ignore t :wk "File")
   "f r" '(counsel-recentf :wk "Find recent files")
-  "f c" '((lambda () (interactive) (find-file "~/.config/emacs/init.org")) :wk "Open emacs config")
+  "f c" '((lambda () (interactive) (find-file (concat user-emacs-directory "/init.org"))) :wk "Open emacs config")
   ";"   '(comment-line :wk "Comment lines")
   ;; Help keybinds
   "h" '(:ignore t :wk "Help")
@@ -161,7 +161,7 @@
 
 (use-package treemacs-projectile :after (treemacs projectile))
 
-(use-package treemacs-all-the-icons :after (treemacs all-the-icons))
+(use-package treemacs-nerd-icons :after (treemacs nerd-icons))
 
 (use-package treemacs-icons-dired)
 
@@ -198,19 +198,17 @@
    :config
    (setq-default pdf-view-display-size 'fit-width)
    (setq pdf-view-use-scaling t
-	 pdf-view-use-imagemagick nil)
+	   pdf-view-use-imagemagick nil)
    (add-hook 'pdf-view-mode-hook
-	     (lambda ()
-	       (setq-local evil-normal-state-cursor (list nil))))
+	       (lambda ()
+		 (setq-local evil-normal-state-cursor (list nil))))
    (evil-make-overriding-map pdf-view-mode-map 'normal)))
 
-(use-package all-the-icons
-  :if (display-graphic-p))
+(use-package nerd-icons)
 
-;; This enables all-the-icons in the dired file manager
-(use-package all-the-icons-dired
-  :after all-the-icons
-  :hook (dired-mode . all-the-icons-dired-mode))
+;; This enables nerd-icons in the dired file manager
+(use-package nerd-icons-dired
+  :hook (dired-mode . nerd-icons-dired-mode))
 
 (use-package ligature
   :config
@@ -234,12 +232,19 @@
   ;; per mode with `ligature-mode'.
   (global-ligature-mode t))
 
+(use-package emojify
+  :config
+  (global-emojify-mode)
+  (setq emojify-styles
+        (delq nil (list 'github 'unicode)))
+  (emojify-set-emoji-styles emojify-styles))
+
 (use-package dashboard
-  :after (all-the-icons projectile)
+  :after (projectile nerd-icons)
   :init
-  (setq initial-buffer-choice (lambda () (get-buffer-create dashboard-buffer-name)))
+  (setq initial-buffer-choice 'dashboard-open)
   (setq dashboard-startup-banner 'logo)
-  (setq dashboard-icon-type 'all-the-icons)
+  (setq dashboard-icon-type 'nerd-icons)
   (setq dashboard-projects-backend 'projectile)
   (setq dashboard-center-content t)
   (setq dashboard-set-heading-icons t)
@@ -268,13 +273,17 @@
   (setq doom-themes-enable-bold t
         doom-themes-enable-italic t
         doom-themes-padded-modeline t)
-  (load-theme 'leuven t)
+  (load-theme 'doom-material-dark t)
 
   (doom-themes-visual-bell-config)
   (doom-themes-org-config))
 
+(use-package doom-modeline
+  :ensure t
+  :init (doom-modeline-mode 1))
+
 (use-package centaur-tabs
-  :after (all-the-icons)
+  :after (nerd-icons)
   :config
   (setq centaur-tabs-style "bar")
   (setq centaur-tabs-set-bar 'over)
@@ -350,9 +359,11 @@
   (ivy-set-display-transformer 'ivy-switch-buffer
                               'ivy-rich-switch-buffer-transform))
 
-(use-package all-the-icons-ivy-rich
-  :after ivy-rich
-  :init (all-the-icons-ivy-rich-mode 1))
+(use-package nerd-icons-ivy-rich
+  :ensure t
+  :init
+  (nerd-icons-ivy-rich-mode 1)
+  (ivy-rich-mode 1))
 
 (use-package company
   :init (setq company-tooltip-align-annotations t)
@@ -418,6 +429,10 @@
          (haskell-literate-mode . lsp)
          (haskell-mode          . (lambda () (setq evil-shift-width 2)))))
 
+(use-package tuareg
+  :hook (tuareg-mode . lsp)
+  :diminish flymake-mode)
+
 (use-package lean4-mode
   :straight (lean4-mode
              :host github
@@ -428,8 +443,8 @@
 (linux-specific!
  (use-package idris2-mode
    :straight (idris2-mode
-	      :host github
-	      :repo "idris-community/idris2-mode")
+		:host github
+		:repo "idris-community/idris2-mode")
    :commands idris2-mode))
 
 (use-package meson-mode :commands meson-mode)
@@ -441,7 +456,7 @@
   :defer t
   :custom (bibtex-dialect 'biblatex)
   :mode ("\\.tex\\'" . LaTeX-mode)
-  :hook (TeX-mode . prettify-symbols-mode)
+  :hook (LaTeX-mode . prettify-symbols-mode)
   :init
   (setq-default TeX-master t)
   (setq TeX-parse-self t
@@ -528,67 +543,64 @@
           ;; Subcaption.
           ("subcaption" "[{")))
   (setq font-latex-match-variable-keywords
-      '(;; Amsmath.
-        ("numberwithin" "{")
-        ;; Enumitem.
-        ("setlist" "[{")
-        ("setlist*" "[{")
-        ("newlist" "{")
-        ("renewlist" "{")
-        ("setlistdepth" "{")
-        ("restartlist" "{")
-        ("crefname" "{")))
+        '(;; Amsmath.
+          ("numberwithin" "{")
+          ;; Enumitem.
+          ("setlist" "[{")
+          ("setlist*" "[{")
+          ("newlist" "{")
+          ("renewlist" "{")
+          ("setlistdepth" "{")
+          ("restartlist" "{")
+          ("crefname" "{")))
 
   (pcase system-type
     ('windows-nt
-     (add-to-list 'TeX-view-program-list '("Okular" ("okular --noraise --unique file:%o" (mode-io-correlate "#src:%n%a"))))
-     (add-to-list 'TeX-view-program-selection '(output-pdf "Okular")))
+     (add-to-list 'TeX-view-program-selection '(output-pdf "SumatraPDF")))
     ('gnu/linux
      (add-to-list 'TeX-view-program-selection '(output-pdf "PDF Tools"))
      (add-hook 'TeX-after-compilation-finished-functions #'TeX-revert-document-buffer)))
 
-      (add-hook 'tex-mode-local-vars-hook #'lsp)
-      (add-hook 'latex-mode-local-vars-hook #'lsp)
+  (add-hook 'tex-mode-local-vars-hook #'lsp)
+  (add-hook 'latex-mode-local-vars-hook #'lsp)
 
-      (require 'tex-fold)
-      (add-hook 'LaTeX-mode-hook #'TeX-fold-mode)
-      (require 'preview)
-      (add-hook 'LaTeX-mode-hook #'LaTeX-preview-setup))
+  (require 'tex-fold)
+  (add-hook 'LaTeX-mode-hook #'TeX-fold-mode)
+  (require 'preview)
+  (add-hook 'LaTeX-mode-hook #'LaTeX-preview-setup))
 
 (use-package auctex-latexmk
-      :after latex
-      :hook (LaTeX-mode . (lambda () ((setq TeX-command-default "LatexMk"))))
-      :init (setq auctex-latexmk-inherit-TeX-PDF-mode t)
-      :config (auctex-latexmk-setup))
+  :after latex
+  :hook (LaTeX-mode . (lambda () (setq TeX-command-default "LatexMk")))
+  :init (setq auctex-latexmk-inherit-TeX-PDF-mode t)
+  :config (auctex-latexmk-setup))
 (use-package evil-tex
-      :after latex
-      :hook (LaTeX-mode . evil-tex-mode))
+  :after latex
+  :hook (LaTeX-mode . evil-tex-mode))
 (use-package cdlatex
-      :after latex
-      :hook ((LaTeX-mode . cdlatex-mode)
-	     (org-mode   . org-cdlatex-mode))
-      :config (setq cdlatex-use-dollar-to-ensure-math nil))
+  :after latex
+  :hook ((LaTeX-mode . cdlatex-mode)
+        (org-mode   . org-cdlatex-mode))
+  :config (setq cdlatex-use-dollar-to-ensure-math nil))
 
 (use-package company-auctex
-      :after latex
-      :config (company-auctex-init))
-
+  :after latex
+  :config (company-auctex-init))
 (use-package company-reftex
-      :after latex
-      :config
-      (add-hook 'TeX-mode-hook
-		(lambda ()
-		  (setq-local company-backends
-			      (append
-				'(company-reftex-labels company-reftex-citations)
-                                company-backends)))))
-
+  :after latex
+  :config
+  (add-hook 'LaTeX-mode-hook
+            (lambda ()
+              (setq-local company-backends
+                          (append
+                          '(company-reftex-labels company-reftex-citations)
+                          company-backends)))))
 (use-package company-math
-      :after latex
-      :config
-      (add-hook 'TeX-mode-hook
-		(lambda ()
-		  (setq-local company-backends
-			      (append
-				'(company-math-symbols-latex company-math-symbols-unicode company-latex-commands)
-				company-backends)))))
+  :after latex
+  :config
+  (add-hook 'LaTeX-mode-hook
+            (lambda ()
+              (setq-local company-backends
+                          (append
+                          '(company-math-symbols-latex company-math-symbols-unicode company-latex-commands)
+                          company-backends)))))
