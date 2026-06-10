@@ -1,0 +1,9 @@
+profile {
+	output "Iiyama North America PL2492Q 1231750201323" mode 2560x1440@99.946Hz position 0,0
+	output "HP Inc. HP V24e 1CR0480JVC" mode 1920x1080 position 2560,0 transform 90
+	output eDP-1 mode 2880x1800 scale 1.25 position 256,1440
+}
+
+profile {
+	output eDP-1 mode 2880x1800 scale 1.25 position 256,1440
+}

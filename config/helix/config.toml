@@ -1,0 +1,9 @@
+theme = "jawad_dark"
+
+[editor]
+bufferline = "multiple"
+lsp.display-inlay-hints = true
+
+[keys.normal]
+"A-l" = "goto_next_buffer"
+"A-h" = "goto_previous_buffer"
