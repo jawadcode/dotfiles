@@ -1,4 +1,9 @@
+[language-server.qmlls]
+command = "qmlls"
+args = [ "-E" ]
+
 [[language]]
 name = "nix"
-formatter.command = "alejandra"
+formatter.command = "nixpkgs-fmt"
 auto-format = true
+

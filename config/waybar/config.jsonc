@@ -128,7 +128,7 @@
         }
     },
     {
-        "output": ["DP-7", "DP-9"],
+        "output": ["DP-7", "DP-9", "DP-1"],
         "height": 30,
         "spacing": 4,
         "modules-left": [ "sway/workspaces", "sway/mode", "sway/scratchpad" ],
