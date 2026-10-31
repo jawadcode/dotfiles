@@ -1,3 +1,9 @@
 [submodule "config/doom"]
 	path = config/doom
 	url = https://github.com/jawadcode/doom-config.git
+[submodule "config/quickshell"]
+	path = config/quickshell
+	url = https://github.com/jawadcode/quickshell-config.git
+[submodule "config/emacs"]
+	path = config/emacs
+	url = https://github.com/jawadcode/qakmacs.git
