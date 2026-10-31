@@ -1,0 +1,7 @@
+window-padding-x = 7
+window-padding-y = 7
+theme = Apple System Colors
+font-family = Iosevka Term SS07
+font-size = 13.5
+background-opacity = 0.85
+background-blur = true
